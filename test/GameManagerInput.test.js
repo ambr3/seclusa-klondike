@@ -477,3 +477,60 @@ describe('GameManager teardown', () => {
         expect(shared.hint.isRunning()).toBe(false);
     });
 });
+
+describe('GameManager footer inset', () => {
+    let root;
+    let gm;
+    let foot;
+
+    beforeEach(() => {
+        setupGame(VIEWPORT);
+        root = document.createElement('div');
+        document.body.appendChild(root);
+        shared.gameFactory = () => new Klondike();
+        gm = new GameManager(root, {}, noopHost);
+        foot = document.createElement('footer');
+        foot.className = 'game-foot';
+        foot.style.cssText = 'position:fixed;left:0;right:0;bottom:0;box-sizing:border-box;height:0;';
+        document.body.appendChild(foot);
+    });
+
+    afterEach(() => {
+        gm.destroy();
+        shared.timer.stop();
+        root.remove();
+        foot.remove();
+    });
+
+    it('judges landscape from the height left after the footer', () => {
+        expect(gm.isLandscape()).toBe(window.innerWidth > window.innerHeight);
+        foot.style.height = '80px';
+        const usable = Math.max(1, window.innerHeight - foot.offsetHeight);
+        expect(gm.isLandscape()).toBe(window.innerWidth > usable);
+    });
+
+    it('does not subtract the home-indicator inset twice when a footer is present', () => {
+        foot.style.height = '80px';
+        gm.safeArea = { top: 0, bottom: 40, left: 0, right: 0 };
+        const boxes = gm.computeBoxes();
+        const viewportH = Math.max(1, window.innerHeight - foot.offsetHeight);
+        if (boxes.isLandscape || !boxes.menuAtBottom) {
+            expect(boxes.chromeBar.top).toBe(viewportH - 64);
+        } else {
+            expect(boxes.menuBar.top).toBe(viewportH - 16 - 72);
+            expect(boxes.chromeBar.top).toBe(boxes.menuBar.top - 64);
+        }
+    });
+
+    it('still insets the bottom safe area when there is no footer', () => {
+        foot.remove();
+        gm.safeArea = { top: 0, bottom: 40, left: 0, right: 0 };
+        const boxes = gm.computeBoxes();
+        const viewportH = Math.max(1, window.innerHeight);
+        if (boxes.isLandscape || !boxes.menuAtBottom) {
+            expect(boxes.chromeBar.top).toBe(viewportH - 40 - 64);
+        } else {
+            expect(boxes.menuBar.top).toBe(viewportH - 40 - 16 - 72);
+        }
+    });
+});

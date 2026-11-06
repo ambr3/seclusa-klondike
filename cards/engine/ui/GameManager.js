@@ -342,7 +342,12 @@ export class GameManager {
         this.safeArea = readSafeArea();
     }
     isLandscape() {
-        return window.innerWidth > window.innerHeight;
+        return window.innerWidth > Math.max(1, window.innerHeight - this.footHeight());
+    }
+    /** Height of the licence footer, when this page has one. */
+    footHeight() {
+        const foot = document.querySelector('.game-foot');
+        return foot ? foot.offsetHeight : 0;
     }
     /** `applyGameLayoutMargins()` — the user-chosen playfield inset, in dp. */
     layoutMargin() {
@@ -380,7 +385,10 @@ export class GameManager {
         const margin = this.layoutMargin();
         const barMargin = DP.barMargin;
         const viewportW = window.innerWidth;
-        const viewportH = window.innerHeight;
+        const foot = this.footHeight();
+        const viewportH = Math.max(1, window.innerHeight - foot);
+        // The licence footer's height already includes the home-indicator inset.
+        const bottomInset = foot > 0 ? 0 : bottom;
         // The playfield inset the user asked for: `applyGameLayoutMargins()` only ever calls
         // `params.setMargins(margin, 0, margin, 0)`, so it is a horizontal inset only, and it
         // is applied to params2 alone — i.e. the playfield and the lower overlay.
@@ -395,7 +403,7 @@ export class GameManager {
             const railLeft = menuOnRight
                 ? viewportW - right - barMargin - barWidth
                 : left + barMargin;
-            const availableHeight = Math.max(0, viewportH - top - bottom - barMargin * 2);
+            const availableHeight = Math.max(0, viewportH - top - bottomInset - barMargin * 2);
             const barHeight = Math.min(availableHeight, DP.menuBarLandscapeMaxHeight);
             const barTop = top + barMargin + Math.round((availableHeight - barHeight) / 2);
             // LEFT_OF / RIGHT_OF pins the far edge to the bar and leaves the near edge on the
@@ -404,7 +412,7 @@ export class GameManager {
             const chromeRight = menuOnRight ? railLeft : viewportW - right;
             const chromeBar = {
                 left: chromeLeft,
-                top: viewportH - bottom - DP.bottomChrome,
+                top: viewportH - bottomInset - DP.bottomChrome,
                 width: Math.max(0, chromeRight - chromeLeft),
                 height: DP.bottomChrome,
             };
@@ -439,7 +447,7 @@ export class GameManager {
         const barWidth = Math.min(availableWidth, DP.menuBarPortraitMaxWidth);
         const menuBar = {
             left: insetLeft + Math.round((availableWidth - barWidth) / 2),
-            top: menuAtBottom ? viewportH - bottom - barMargin - barHeight : top + barMargin,
+            top: menuAtBottom ? viewportH - bottomInset - barMargin - barHeight : top + barMargin,
             width: barWidth,
             height: barHeight,
         };
@@ -447,7 +455,7 @@ export class GameManager {
         // ALIGN_PARENT_BOTTOM, full width. Either way it runs edge to edge.
         const chromeBar = {
             left: left,
-            top: menuAtBottom ? menuBar.top - DP.bottomChrome : viewportH - bottom - DP.bottomChrome,
+            top: menuAtBottom ? menuBar.top - DP.bottomChrome : viewportH - bottomInset - DP.bottomChrome,
             width: Math.max(0, viewportW - left - right),
             height: DP.bottomChrome,
         };

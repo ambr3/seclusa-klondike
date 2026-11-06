@@ -8,8 +8,6 @@ echo "→ $(basename "$PWD") tests @ $PWD"
 echo "-- header parser --"
 python3 scripts/test_serve.py
 
-echo "-- game suite --"
-
 WORKSPACE="$(cd ../.. && pwd)"
 NODE="$WORKSPACE/tools/nvm/versions/node/v24.21.0/bin/node"
 HARNESS="$WORKSPACE/tools/pkg/playwright/run-games-tests.mjs"
@@ -18,6 +16,11 @@ if [ ! -x "$NODE" ]; then
   echo "FAIL: node not found at $NODE"
   exit 1
 fi
+
+echo "-- service worker --"
+"$NODE" --check sw.js
+
+echo "-- game suite --"
 if [ ! -f "$HARNESS" ]; then
   echo "FAIL: playwright harness not found at $HARNESS"
   exit 1

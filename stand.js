@@ -12,14 +12,8 @@
 
     var copy = window.STAND_COPY || {};
     var KEY_SOUND = "ssc.pref_key_sound_enabled";
-    var KEY_COLOR = "ssc.pref_key_theme_color";
     var KEY_NIGHT = "ssc.pref_key_night_mode";
     var NIGHTS = ["system", "light", "dark"];
-    var PALETTES = [
-        "orange", "green", "blue", "purple",
-        "rose", "teal", "amber", "slate",
-        "navy", "indigo", "lime", "crimson"
-    ];
 
     function read(key, fallback) {
         try {
@@ -84,26 +78,30 @@
         scrim.addEventListener("click", close);
         sheet = el("div", "stand-sheet");
         sheet.setAttribute("role", "dialog");
-        sheet.setAttribute("aria-label", copy.name || "Game menu");
+        sheet.setAttribute("aria-label", "App settings");
 
         var closeBtn = el("button", "stand-close", "Close");
         closeBtn.type = "button";
         closeBtn.addEventListener("click", close);
         sheet.appendChild(closeBtn);
-        sheet.appendChild(el("h2", null, copy.name || "Game"));
 
-        if (copy.sound !== false) {
-            sheet.appendChild(el("h2", null, "Sound"));
-            var soundRow = el("div", "stand-row");
-            var on = read(KEY_SOUND, "true") !== "false";
-            soundRow.appendChild(choice(on ? "Sound on" : "Sound off", on, function () {
-                on = !on;
-                write(KEY_SOUND, on ? "true" : "false");
+        sheet.appendChild(el("h2", null, "Sounds"));
+        var soundItems = Array.isArray(copy.sounds) && copy.sounds.length
+            ? copy.sounds
+            : [{ label: "Sounds", key: KEY_SOUND }];
+        soundItems.forEach(function (item) {
+            if (!item || typeof item.key !== "string" || item.key.indexOf("ssc.pref_key_") !== 0) return;
+            if (item.follow && read(item.follow, "true") === "false") return;
+            var on = read(item.key, "true") !== "false";
+            var label = item.label || "Sound";
+            var row = el("div", "stand-row");
+            row.appendChild(choice(on ? label + " on" : label + " off", on, function () {
+                write(item.key, on ? "false" : "true");
                 close();
                 open();
             }));
-            sheet.appendChild(soundRow);
-        }
+            sheet.appendChild(row);
+        });
 
         sheet.appendChild(el("h2", null, "Theme"));
         var night = read(KEY_NIGHT, "system");
@@ -118,18 +116,6 @@
         });
         sheet.appendChild(nightRow);
 
-        var palette = read(KEY_COLOR, "navy");
-        var paletteRow = el("div", "stand-row");
-        PALETTES.forEach(function (name) {
-            var label = name.charAt(0).toUpperCase() + name.slice(1);
-            paletteRow.appendChild(choice(label, palette === name, function () {
-                write(KEY_COLOR, name);
-                close();
-                open();
-            }));
-        });
-        sheet.appendChild(paletteRow);
-
         sheet.appendChild(el("h2", null, "How to play"));
         (copy.rules || []).forEach(function (line) {
             sheet.appendChild(el("p", null, line));
@@ -139,17 +125,11 @@
         (copy.about || []).forEach(function (line) {
             sheet.appendChild(el("p", null, line));
         });
-        if (copy.source) {
-            var link = el("a", "stand-link", "Source");
-            link.href = copy.source;
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            sheet.appendChild(link);
-        }
 
         sheet.appendChild(el("h2", null, "Fullscreen"));
         var full = el("div", "stand-row");
-        full.appendChild(choice("Toggle fullscreen", false, function () {
+        var fullOn = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        full.appendChild(choice(fullOn ? "Fullscreen on" : "Fullscreen off", fullOn, function () {
             var node = document.documentElement;
             var active = document.fullscreenElement || document.webkitFullscreenElement;
             var done = active
@@ -167,9 +147,9 @@
     }
 
     function boot() {
-        var button = el("button", "stand-more", "More");
+        var button = el("button", "stand-more", "App settings");
         button.type = "button";
-        button.setAttribute("aria-label", "Theme, sound, how to play and about");
+        button.setAttribute("aria-label", "App settings");
         if (copy.corner) button.setAttribute("data-corner", copy.corner);
         button.addEventListener("click", open);
         document.body.appendChild(button);

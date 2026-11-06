@@ -8,14 +8,18 @@
     z-index: 40;
     top: max(8px, env(safe-area-inset-top));
     right: max(8px, env(safe-area-inset-right));
-    min-width: 44px;
+    box-sizing: border-box;
+    width: 5.4rem;
+    max-width: 5.4rem;
     min-height: 44px;
-    padding: 0 12px;
-    border-radius: 999px;
+    padding: 6px 8px;
+    border-radius: 16px;
     border: 1px solid var(--md-sys-color-outline-variant, #3a3a3a);
     background: color-mix(in srgb, var(--md-sys-color-surface-container, #1a1a1a) 88%, transparent);
     color: var(--md-sys-color-on-surface, #f5f5f5);
-    font: 600 14px/1 var(--font-sans, system-ui, sans-serif);
+    font: 600 12px/1.15 var(--font-sans, system-ui, sans-serif);
+    white-space: normal;
+    text-align: center;
     cursor: pointer;
 }
 
@@ -86,3 +90,69 @@
 .stand-close {
     float: right;
 }
+
+/*
+ * Licence footer. A real footer, not a dialog, so the licence and source
+ * links are on the page even when JavaScript is off.
+ */
+:root {
+    --game-foot: calc(2.8rem + env(safe-area-inset-bottom, 0px));
+}
+
+.game-foot {
+    position: fixed;
+    z-index: 30;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--game-foot);
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0.75rem max(0.2rem, env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    background-color: transparent;
+    color: var(--md-sys-color-on-surface, #f5f5f5);
+    border: none;
+    box-shadow: none;
+    text-shadow: 0 1px 2px color-mix(in srgb, #000 55%, transparent);
+    overflow: visible;
+    pointer-events: none;
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.game-foot a,
+.game-foot .flag {
+    pointer-events: auto;
+}
+
+.game-credits {
+    margin: 0;
+    max-width: 42rem;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.35;
+    font-family: var(--font-sans, system-ui, sans-serif);
+}
+
+.game-credits a {
+    color: var(--md-sys-color-primary, #c45c26);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.game-credits .heart {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
+.game-credits .flag {
+    width: 0.95em;
+    height: auto;
+    display: inline-block;
+    vertical-align: -0.1em;
+    border-radius: 1px;
+}
+

@@ -3,6 +3,10 @@ window.STAND_COPY = {
   "source": "https://github.com/ambr3/seclusa-klondike",
   "corner": "right",
   "sound": true,
+  "sounds": [
+    { "label": "Sounds", "key": "ssc.pref_key_sound_enabled" },
+    { "label": "Winning sound", "key": "ssc.pref_key_sound_win_enabled", "follow": "ssc.pref_key_sound_enabled" }
+  ],
   "rules": [
     "Deal all 52 cards into seven columns, then build the four foundations up by suit from Ace to King.",
     "Only a King, or a column headed by a King, may go on an empty column.",

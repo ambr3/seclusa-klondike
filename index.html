@@ -20,9 +20,14 @@
     <meta name="color-scheme" content="light dark">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Seclusa Klondike">
     <meta name="application-name" content="Seclusa Klondike">
     <meta name="format-detection" content="telephone=no">
     <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+    <link rel="icon" href="icon-512.png" type="image/png" sizes="512x512">
+    <link rel="apple-touch-icon" href="icon-192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="icon-512.png" sizes="512x512">
     <title>Seclusa Klondike</title>
 
     <!-- Shared design system first, then the card-game board styles on top of it. -->
@@ -37,7 +42,7 @@
         in the launcher — or in another game — lands here without a reload.
     -->
     <script src="theme-game.js"></script>
-    <meta name="version" content="0.1.0">
+    <meta name="version" content="0.1.1">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="stand.css">
 </head>
@@ -46,6 +51,27 @@
         <p class="noscript-note">JavaScript is required to play Klondike. Everything runs locally in your browser.</p>
     </noscript>
     <div id="app"></div>
+
+    <footer class="game-foot">
+        <p class="game-credits">
+            Forked from
+            <a href="https://github.com/TobiasBielefeld/Simple-Solitaire" target="_blank" rel="noopener noreferrer">Simple Solitaire Collection</a>
+            via <a href="https://github.com/ambr3/Seclusa-Solitaire" target="_blank" rel="noopener noreferrer">Seclusa Solitaire</a>.
+            <a href="LICENSE">GPL-3.0</a>
+            · <a href="https://github.com/ambr3/seclusa-klondike" target="_blank" rel="noopener noreferrer">Source</a>
+            · Made with <span class="heart" role="img" aria-label="love">&#10084;&#65039;</span>
+            <svg class="flag" viewBox="0 0 60 30" role="img" aria-label="United Kingdom">
+                <clipPath id="game-uk-clip"><rect width="60" height="30" /></clipPath>
+                <g clip-path="url(#game-uk-clip)">
+                    <rect width="60" height="30" fill="#012169" />
+                    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6" />
+                    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="4" />
+                    <path d="M30,0 V30 M0,15 H60" stroke="#fff" stroke-width="10" />
+                    <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" stroke-width="6" />
+                </g>
+            </svg>
+        </p>
+    </footer>
 
     <script type="module" src="main.js"></script>
     <script src="stand-help.js"></script>
