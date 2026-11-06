@@ -1,0 +1,6 @@
+# Seclusa Klondike is a private, installable app rather than a public site.
+# index.html declares noindex/nofollow; this states the same intent for crawlers
+# that read robots.txt instead. Nothing here is meant to be indexed.
+
+User-agent: *
+Disallow: /

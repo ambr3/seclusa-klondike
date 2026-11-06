@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-mono>
+<head>
+    <meta charset="UTF-8">
+    <!--
+        The launcher frames this game. This document frames nothing, so frame-src
+        is 'none'. `child-src 'self'` used to sit beside it and would allow a frame
+        in a browser that still treats child-src as the frame fallback.
+        `frame-ancestors` is ignored inside a <meta> CSP. The local dev server sends
+        X-Frame-Options: SAMEORIGIN so the launcher can frame this page. It does not
+        send frame-ancestors. GitHub Pages sends neither.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; font-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests">
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), clipboard-read=(), usb=(), midi=(), serial=(), display-capture=(), accelerometer=(), gyroscope=(), magnetometer=(), idle-detection=(), screen-wake-lock=(), browsing-topics=(), interest-cohort=()">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="referrer" content="no-referrer">
+    <meta name="description" content="Seclusa Klondike — the classic solitaire, ported from Tobias Bielefeld's GPL-3.0 Android app. No ads, no tracking, all local.">
+    <meta name="theme-color" content="#0d2340">
+    <meta name="color-scheme" content="light dark">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Seclusa Klondike">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+    <title>Seclusa Klondike</title>
+
+    <!-- Shared design system first, then the card-game board styles on top of it. -->
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="seclusa-base.css">
+    <link rel="stylesheet" href="mono.css">
+    <link rel="stylesheet" href="cards/cards.css">
+
+    <!--
+        Shared theme bootstrap. Sets data-palette / data-theme before first paint
+        (no `defer` on purpose) and listens for `storage` so a palette change made
+        in the launcher — or in another game — lands here without a reload.
+    -->
+    <script src="theme-game.js"></script>
+    <meta name="version" content="0.1.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="stand.css">
+</head>
+<body>
+    <noscript>
+        <p class="noscript-note">JavaScript is required to play Klondike. Everything runs locally in your browser.</p>
+    </noscript>
+    <div id="app"></div>
+
+    <script type="module" src="main.js"></script>
+    <script src="stand-help.js"></script>
+    <script src="stand.js"></script>
+</body>
+</html>

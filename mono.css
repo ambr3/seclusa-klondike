@@ -1,0 +1,248 @@
+/*
+ * Seclusa Games — the monochrome mapping.
+ *
+ * The launcher and the three newer games wear the shared black-and-white palette
+ * from theme/seclusa-base.css. Klondike and Pyramid keep the Material 3 colour
+ * palettes and are deliberately left alone, so this has to be an opt-in layer
+ * rather than a replacement for theme.css.
+ *
+ * WHY THE PALETTE IS RESTATED HERE UNDER ITS OWN NAMES
+ *
+ * Blocks and Word Puzzle already use --bg, --text, --accent and --radius as
+ * their own local names, aliased onto the Material roles:
+ *
+ *     --text:   var(--md-sys-color-on-surface);
+ *     --accent: var(--md-sys-color-primary);
+ *
+ * So a mapping that pointed --md-sys-color-on-surface back at --text, the way a
+ * literal reading of "use the base theme" suggests, closes a loop:
+ * base --text -> role -> game's --text. A circular custom property computes to
+ * the guaranteed-invalid value, so --text came back empty, every `color:
+ * var(--text)` in those games became invalid, and the pages fell back to
+ * inherited black on a near-black background.
+ *
+ * Hence the --mono- prefix. These names are used by nothing else in the app, so
+ * the game's own aliases resolve cleanly onto the roles mapped below.
+ * seclusa-base.css is still linked, and still the source these values are taken
+ * from — it just is not referenced through the names the games have taken.
+ */
+
+:root[data-mono][data-theme='light'] {
+  --mono-bg: #ffffff;
+  --mono-surface: #ffffff;
+  --mono-surface-2: #f2f2f2;
+  --mono-surface-3: #e6e6e6;
+  --mono-text: #0a0a0a;
+  --mono-text-dim: #5a5a5a;
+  --mono-text-faint: #8a8a8a;
+  --mono-border: #d4d4d4;
+  --mono-border-strong: #a8a8a8;
+  --mono-accent: #0a0a0a;
+  --mono-accent-text: #ffffff;
+  --mono-accent-tint: rgba(10, 10, 10, 0.08);
+  --mono-danger: #a1160d;
+}
+
+:root[data-mono][data-theme='dark'] {
+  --mono-bg: #0a0a0a;
+  --mono-surface: #111111;
+  --mono-surface-2: #1c1c1c;
+  --mono-surface-3: #262626;
+  --mono-text: #f5f5f5;
+  --mono-text-dim: #a3a3a3;
+  --mono-text-faint: #737373;
+  --mono-border: #2e2e2e;
+  --mono-border-strong: #454545;
+  --mono-accent: #ffffff;
+  --mono-accent-text: #0a0a0a;
+  --mono-accent-tint: rgba(255, 255, 255, 0.14);
+  --mono-danger: #f2857c;
+}
+
+/*
+ * One role map for both themes, because every value above already flips with
+ * data-theme.
+ *
+ * The selector is :root[data-mono][data-theme] — three class-weight selectors
+ * at (0,3,0), against theme.css's [data-theme='…'][data-palette='…'] at (0,2,0).
+ * It wins on specificity rather than on source order, so this file does not have
+ * to be linked last to work.
+ *
+ * Opt-in is a static data-mono attribute on <html>. Nothing sets or removes it
+ * at runtime, and theme.js / theme-game.js / games/pacman/theme.js only ever
+ * write data-palette and data-theme, so a theme change cannot lose it.
+ */
+:root[data-mono][data-theme] {
+  /* The accent is the opposite of the background. It marks the current
+     selection and the primary action, nothing else. */
+  --md-sys-color-primary: var(--mono-accent);
+  --md-sys-color-on-primary: var(--mono-accent-text);
+  --md-sys-color-primary-container: var(--mono-accent-tint);
+  --md-sys-color-on-primary-container: var(--mono-text);
+
+  --md-sys-color-secondary: var(--mono-text-dim);
+  --md-sys-color-on-secondary: var(--mono-bg);
+  --md-sys-color-secondary-container: var(--mono-surface-2);
+  --md-sys-color-on-secondary-container: var(--mono-text);
+
+  --md-sys-color-tertiary: var(--mono-text-faint);
+  --md-sys-color-on-tertiary: var(--mono-bg);
+  --md-sys-color-tertiary-container: var(--mono-surface-3);
+  --md-sys-color-on-tertiary-container: var(--mono-text);
+
+  /* Surfaces step up with elevation. The palette has three steps, so the
+     container roles share them rather than inventing greys that would not match
+     the rest of the product. */
+  --md-sys-color-surface: var(--mono-bg);
+  --md-sys-color-on-surface: var(--mono-text);
+  --md-sys-color-surface-variant: var(--mono-surface-2);
+  --md-sys-color-on-surface-variant: var(--mono-text-dim);
+  --md-sys-color-surface-container-lowest: var(--mono-bg);
+  --md-sys-color-surface-container-low: var(--mono-surface);
+  --md-sys-color-surface-container: var(--mono-surface);
+  --md-sys-color-surface-container-high: var(--mono-surface-2);
+  --md-sys-color-surface-container-highest: var(--mono-surface-3);
+
+  --md-sys-color-outline: var(--mono-border-strong);
+  --md-sys-color-outline-variant: var(--mono-border);
+
+  /* Kept because it carries meaning: this is the error colour, not decoration. */
+  --md-sys-color-error: var(--mono-danger);
+  --md-sys-color-on-error: var(--mono-bg);
+
+  /* A scrim dims what is behind it and has to read the same in both themes, so
+     it is the one role here that is a literal rather than a token. */
+  --md-sys-color-scrim: rgba(0, 0, 0, 0.55);
+
+  --theme-game-select-background: var(--mono-accent);
+  --theme-game-select-background-end: var(--mono-accent);
+  --theme-color-drawer-selected: var(--mono-accent-tint);
+}
+
+/*
+ * The note under "Card game colour". It has to read as an aside to the heading
+ * rather than as body copy, so it is dimmed and set smaller, and the rhythm
+ * between it and the swatches is tightened to match the dialog's spacing.
+ */
+:root[data-mono][data-theme] .dialog-note {
+  margin: -4px 0 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/*
+ * The warm accent.
+ *
+ * One warm note, kept to the edges of things: the theme's rule is that warm
+ * tints and glows and never fills, so nothing here is a solid orange and no
+ * large area carries more than a wash.
+ *
+ * Opt-in is a separate `data-warm` attribute rather than riding on `data-mono`.
+ * Klondike and Pyramid wear the black-and-white theme but keep no colour at all
+ * -- not even one -- so "is this page on the theme" is not the same question as
+ * "does this page get the accent", and one flag cannot answer both.
+ */
+:root[data-warm][data-theme] {
+  --mono-warm: var(--warm, #e08a3c);
+}
+
+/* Focus. The one place a warm ring is unambiguous: it says where the keyboard
+   is, it is a couple of pixels wide, and it is the ring the whole site uses. */
+:root[data-warm] :focus-visible {
+  outline: 2px solid var(--mono-warm);
+  outline-offset: 2px;
+}
+
+/* The pressed / on state of the header pills and the mode tiles. A tint and a
+   glow rather than a fill, so the pill still reads as black or white. */
+:root[data-warm] .header-button[aria-pressed="true"],
+:root[data-warm] .mode-btn.active,
+:root[data-warm] .pill-choice.is-selected {
+  box-shadow: 0 0 0 1px var(--mono-warm), 0 0 14px -4px var(--warm-glow);
+}
+
+/*
+ * A glow behind the launcher bar and behind the app mark.
+ *
+ * This replaces a hairline that ran along the top edge of the bar, `inset 0 1px 0
+ * var(--warm-edge)`. It read as a rule drawn across the top of the screen rather than as
+ * anything belonging to the bar — on a page whose whole surface is a grid, the one hard
+ * straight line in the warm colour was the thing that looked pasted on. Warmth around the
+ * bar says the same thing without drawing a line across anything.
+ *
+ * The bar's own shadow is restated because this rule replaces `box-shadow` wholesale, not
+ * adds to it: left out, the bar would lose its separation from the grid behind it.
+ */
+:root[data-warm] .shell-bar {
+  box-shadow: var(--score-chip-shadow), 0 0 22px -8px var(--warm-glow);
+}
+
+/*
+ * The game's own name, on the same terms, in the bar it sits in while a game is open.
+ *
+ * `text-shadow` rather than `box-shadow` because this is a run of text: a box shadow
+ * would sit behind the text box as one rectangle, including the empty space either side
+ * of a short name, which is the slab look again.
+ *
+ * Two shadows, and both far stronger than `--warm-glow`, because a glow on text is not a
+ * glow on a box. A shadow on a box is drawn outside the shape and every bit of it lands;
+ * a shadow on a glyph is drawn behind it, so most of it is hidden by the very stroke it
+ * is meant to be lighting, and what escapes has been spread thin by the blur. One shadow
+ * at `--warm-glow`'s 0.32 over a 12px blur measured at 5 orange pixels in 38,000 — 0.01%,
+ * which is not a glow, it is a rounding error. The tight one carries the colour and the
+ * broad one carries the spread, and neither is at 0.32.
+ *
+ * Built from `--warm` rather than `--warm-glow` so it follows the palette in both themes
+ * while being allowed to be far more opaque than a rule or an edge ever is.
+ */
+:root[data-warm] .stage-title {
+  text-shadow:
+    0 0 5px color-mix(in srgb, var(--warm) 85%, transparent),
+    0 0 16px color-mix(in srgb, var(--warm) 45%, transparent);
+}
+
+/*
+ * The same glow on the controller.
+ *
+ * `drop-shadow` rather than `box-shadow` because the mark is a transparent PNG: a box
+ * shadow would draw a rectangle around the artwork's bounds, which for a controller with a
+ * hole in the middle means a visible slab behind a shape that has none. `drop-shadow`
+ * follows the alpha, so the light is around the shape.
+ *
+ * In dark theme the mark is inverted, so the filter has to be restated with the invert
+ * still first — an `invert(1)` here would cancel the shadow out entirely.
+ */
+:root[data-warm] .launcher-logo {
+  filter: drop-shadow(0 0 20px var(--warm-glow));
+}
+
+:root[data-warm][data-theme='dark'] .launcher-logo,
+:root[data-warm][data-theme='dark'] .launcher-logo:hover {
+  filter: invert(1) drop-shadow(0 0 20px var(--warm-glow));
+}
+
+/*
+ * The same confirmation, without the colour.
+ *
+ * Warm pages get their glow from the block above. Klondike and Pyramid get none,
+ * which left a selected setting as a 1px border and an 8% tint -- legible only to
+ * someone who already knows which one they picked, and the picker had no glow at
+ * all to say it had taken the click.
+ *
+ * `:not([data-warm])` rather than a lower specificity on purpose: the warm rule
+ * and this one are then mutually exclusive, so neither can win a cascade against
+ * the other and the accent on Munch, Blocks and Word Puzzle stays exactly as it
+ * was. The glow is in the accent colour the page already has -- black on white,
+ * white on black -- so it stays monochrome and needs no colour of its own.
+ *
+ * A ring plus an outward glow, not a fill: the pill still reads as black or
+ * white, and a colour swatch still shows the colour it stands for.
+ */
+:root[data-mono]:not([data-warm]) .pill-choice.is-selected,
+:root[data-mono]:not([data-warm]) .preview-cell.is-selected,
+:root[data-mono]:not([data-warm]) .color-swatch.is-selected {
+  box-shadow:
+    0 0 0 2px var(--md-sys-color-primary),
+    0 0 16px -4px var(--md-sys-color-primary);
+}

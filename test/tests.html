@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--
+        Same posture as every other document in the app: no framing, no objects, no
+        third-party anything. Three allowances, all narrow:
+          - `style-src` needs 'unsafe-inline' for this page's own <style> block.
+          - `media-src 'self'` because the suite that exercises GameManager builds a
+            real `Sounds` and preloads the actual .ogg and .wav files.
+          - `connect-src 'self'` — the one departure from the shipped pages, which use
+            'none'. The shellStatic suite asserts things about the app's own source files
+            (does every document carry a CSP, does every new-tab link carry
+            rel=noopener), and the only way to read a file is to fetch it. That is
+            same-origin and reaches this app's own documents; it cannot reach anything
+            else. The alternative was to assert those properties from a copy of the
+            source, which would test the copy.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tests — running</title>
+    <style>
+        /*
+         * Deliberately self-contained: this page must work with nothing installed, so it
+         * does not link the shared theme (the test harness has no business depending on
+         * the design system to report results).
+         */
+        :root { color-scheme: light dark; }
+
+        body {
+            margin: 0;
+            padding: 1.5rem clamp(1rem, 4vw, 3rem) 4rem;
+            font: 15px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            background: #14161a;
+            color: #e6e6e6;
+        }
+
+        h1 { margin: 0 0 .25rem; font-size: 1.25rem; }
+        p.sub { margin: 0 0 1.25rem; color: #9aa0a6; }
+
+        #summary {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem 1.5rem;
+            align-items: baseline;
+            padding: .75rem 0;
+            margin-bottom: .5rem;
+            background: #14161a;
+            border-bottom: 1px solid #2a2e35;
+        }
+        #summary .count { font-size: 1.1rem; font-weight: 700; }
+        #summary .pass { color: #7ee787; }
+        #summary .fail { color: #ff7b72; }
+        #summary .total { color: #9aa0a6; }
+
+        .suite { margin: 1.5rem 0 .5rem; font-size: 1rem; font-weight: 700; color: #d2a8ff; }
+
+        .test { display: flex; gap: .6rem; padding: .2rem 0; align-items: baseline; }
+        .test .mark { flex: 0 0 1.4em; }
+        .ok  .mark { color: #7ee787; }
+        .bad .mark { color: #ff7b72; }
+        .bad .name { color: #ff7b72; }
+        .err {
+            margin: .1rem 0 .6rem 2em;
+            padding: .5rem .75rem;
+            border-left: 3px solid #ff7b72;
+            background: #241a1c;
+            color: #ffc7c2;
+            white-space: pre-wrap;
+        }
+        .ms { margin-left: auto; color: #5c626b; font-size: .85em; }
+
+        #controls { margin: 0 0 1.25rem; display: flex; gap: .5rem; flex-wrap: wrap; }
+        #controls input {
+            flex: 1 1 14rem;
+            padding: .4rem .6rem;
+            font: inherit;
+            background: #1d2027;
+            color: inherit;
+            border: 1px solid #2a2e35;
+            border-radius: 6px;
+        }
+        #controls button {
+            padding: .4rem .9rem;
+            font: inherit;
+            background: #1d2027;
+            color: inherit;
+            border: 1px solid #2a2e35;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        #controls button:hover { border-color: #4a515c; }
+    </style>
+</head>
+<body>
+    <h1>Seclusa Klondike tests</h1>
+    <p class="sub">
+        Plain ES modules, no build step, no test runner. Every assertion runs against the real
+        engine in a real browser. The card-engine suites are ports of the JUnit/TypeScript tests
+        that ship with the Android app; test names are unchanged where they already existed.
+        The shell suites cover the app around the engine: the security and privacy invariants
+        that regress silently, and the theme bootstrap every game frame loads.
+    </p>
+
+    <div id="controls">
+        <input id="filter" type="search" placeholder="filter by suite or test name…" autocomplete="off">
+        <button id="rerun" type="button">Rerun</button>
+    </div>
+
+    <div id="summary"><span class="count">Running…</span></div>
+    <div id="results"></div>
+
+    <script type="module" src="tests.js"></script>
+</body>
+</html>

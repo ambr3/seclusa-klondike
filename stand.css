@@ -1,0 +1,88 @@
+/*
+ * App menu for a game that used to live under the Seclusa Games launcher.
+ * Theme, sound, how to play, about and fullscreen live here now.
+ */
+
+.stand-more {
+    position: fixed;
+    z-index: 40;
+    top: max(8px, env(safe-area-inset-top));
+    right: max(8px, env(safe-area-inset-right));
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--md-sys-color-outline-variant, #3a3a3a);
+    background: color-mix(in srgb, var(--md-sys-color-surface-container, #1a1a1a) 88%, transparent);
+    color: var(--md-sys-color-on-surface, #f5f5f5);
+    font: 600 14px/1 var(--font-sans, system-ui, sans-serif);
+    cursor: pointer;
+}
+
+.stand-more[data-corner="left"] {
+    right: auto;
+    left: max(8px, env(safe-area-inset-left));
+}
+
+.stand-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.stand-sheet {
+    position: fixed;
+    z-index: 51;
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    left: max(12px, env(safe-area-inset-left));
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
+    padding: 16px 16px 24px;
+    border-radius: 16px;
+    background: var(--md-sys-color-surface, #111);
+    color: var(--md-sys-color-on-surface, #f5f5f5);
+    font: 16px/1.45 var(--font-sans, system-ui, sans-serif);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+.stand-sheet h2 {
+    margin: 16px 0 8px;
+    font-size: 1.05rem;
+}
+
+.stand-sheet p,
+.stand-sheet li {
+    margin: 0 0 8px;
+}
+
+.stand-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0 12px;
+}
+
+.stand-sheet button,
+.stand-sheet a.stand-link {
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--md-sys-color-outline-variant, #3a3a3a);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.stand-sheet button[aria-pressed="true"] {
+    background: var(--md-sys-color-primary, #c45c26);
+    color: var(--md-sys-color-on-primary, #fff);
+    border-color: transparent;
+}
+
+.stand-close {
+    float: right;
+}

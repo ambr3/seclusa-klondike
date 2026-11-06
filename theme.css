@@ -1,0 +1,1371 @@
+/*
+ * Seclusa Games — the shared Material 3 design system.
+ *
+ * Tokens and chrome are ported from the Solitaire PWA so every game shares one look:
+ *   Solitaire/pwa/src/ui/theme.css   (Material 3 theme transcribed from the Android app)
+ *   Solitaire/pwa/src/ui/theme.ts    (light/dark + palette role values)
+ *   Solitaire/pwa/src/ui/AboutScreen.ts, Dialogs.ts (app bar, dialogs, pills, cards)
+ *
+ * The palette and night mode are applied through the `data-palette` / `data-theme`
+ * attributes on <html> instead of inline styles, because there is no bundler for a
+ * game's shell — theme-game.js only sets those two attributes and persists the choice.
+ */
+
+/*
+ * Typography.
+ *
+ * DM Sans for body, Sora for headings — the same pair the Seclusa Weather app uses, so
+ * the whole Seclusa family shares one voice.
+ *
+ * Self-hosted, deliberately. A font from Google's CDN would mean a request to a third
+ * party on every first visit, which breaks the promise this app makes in its README and
+ * in its `connect-src 'none'` policy. These files are latin-subset WOFF2 copied from
+ * the weather app's own assets; all six together are 96 KB, loaded once and cached.
+ *
+ * This also fixes small text rendering as a scatter of dots. `system-ui` was resolving
+ * to a face the browser did not treat as concrete — it matched none of the installed
+ * families when measured — and the fallback's hinting broke glyph stems apart at the
+ * sizes this UI uses. A real hinted webfont does not have that failure mode.
+ *
+ * `font-display: swap` so text paints immediately in the fallback rather than staying
+ * invisible while the woff2 arrives.
+ *
+ * Pac-Man's ArcadeR is the one deliberate exception: it is part of that game's arcade
+ * identity rather than app chrome, and stays.
+ */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('assets/fonts/dm-sans-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('assets/fonts/dm-sans-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('assets/fonts/dm-sans-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('assets/fonts/dm-sans-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('assets/fonts/sora-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('assets/fonts/sora-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('assets/fonts/sora-latin-800-normal.woff2') format('woff2');
+}
+
+:root {
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Noto Sans', 'Liberation Sans', Arial, sans-serif;
+  --font-display: 'Sora', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, sans-serif;
+
+  /*
+   * The shared page backdrop: a square grid, masked to fade out from the centre, over
+   * a soft vignette.
+   *
+   * This started life as Blocks' own background. It is now the app's — every game and
+   * the launcher wear the same grid, so the five games read as one product rather than
+   * five that happen to share a palette.
+   *
+   * The ink is a very faded orange rather than the palette's on-surface grey, and mixed
+   * from `--warm` so it follows the canonical palette in seclusa-base.css and flips with
+   * light and dark on its own — at 8% there is no second orange here to keep in step.
+   * It is fainter than the grey it replaced because the grid sits behind text and tiles
+   * on this screen, where a 10% line is a visible weave rather than ground.
+   *
+   * The card games do not show this grid: their felt is an absolutely positioned element
+   * over the whole window, painted on top of `html::before`. They carry their own, which
+   * is why the two are not one token.
+   *
+   * The fallback in `--warm` is load-bearing. Three offline pages link this file without
+   * seclusa-base.css, where `--warm` is undefined -- and an undefined var() inside
+   * color-mix() makes the whole declaration invalid at computed-value time, which takes
+   * the grid with it and shows no error. The fallback is the dark-theme value from
+   * seclusa-base.css, so those pages get the same line rather than none.
+   */
+  --page-grid-ink: color-mix(in srgb, var(--warm, #e08a3c) 8%, transparent);
+  --page-grid-size: 32px;
+  --page-vignette: color-mix(in srgb, var(--md-sys-color-scrim) 9%, transparent);
+
+  /* Neutral color roles (light) — Solitaire values/colors.xml */
+  --md-sys-color-surface: #fcf8f7;
+  --md-sys-color-on-surface: #1c1b1b;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f6f1f0;
+  --md-sys-color-surface-container: #f0ebea;
+  --md-sys-color-surface-container-high: #ebe4e4;
+  --md-sys-color-surface-container-highest: #e5dedd;
+  --md-sys-color-surface-bright: #fcf8f6;
+  --md-sys-color-surface-dim: #dcd5d4;
+  --md-sys-color-surface-variant: #e8e0de;
+  --md-sys-color-on-surface-variant: #4a4444;
+  --md-sys-color-outline: #7b7474;
+  --md-sys-color-outline-variant: #cbc3c2;
+  --md-sys-color-error: #b3261e;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #f9dedc;
+  --md-sys-color-on-error-container: #410e0b;
+  --md-sys-color-inverse-surface: #32302f;
+  --md-sys-color-inverse-on-surface: #f5eeed;
+  --md-sys-color-scrim: #000000;
+
+  /*
+   * HAIRLINES.
+   *
+   * A one-pixel rule only reads as a *line* when it is opaque enough. Below roughly a
+   * quarter of the ink colour it stops being a continuous stroke and reads as a row of
+   * dots — which is the "dotty line" artefact, and it gets worse the thinner the line is
+   * in device pixels. Measured at devicePixelRatio 1.25, Chromium reports a used border
+   * width of 0.8px for 1px, 1.5px and even 0.5px — one whole device pixel in every case —
+   * so the width is not the variable; the alpha is.
+   *
+   * These two tokens put a floor under it. Mix with `transparent`, so they tint whatever
+   * surface they sit on and stay correct in both themes.
+   */
+  --hairline: color-mix(in srgb, var(--md-sys-color-on-surface) 30%, transparent);
+  --hairline-strong: color-mix(in srgb, var(--md-sys-color-on-surface) 55%, transparent);
+
+  /*
+   * Chrome colors — menu bar, chips, header buttons.
+   *
+   * These used to be hard-coded translucent washes — `--menu-bar-surface: #1affffff`
+   * over a `blur(6px)` backdrop — which resolve to a cold pale-cyan 30% white border.
+   * Against the card games' green playfields that reads as an unwanted cold edge, and
+   * the dark theme's `#cc1a1a1a` surface put a maroon wash behind every pill.
+   *
+   * They are now palette-aware Material roles instead. Chrome recedes; the palette
+   * colour is reserved for accents (active buttons, focus, the card playfield), so the
+   * whole app shifts with the theme and nothing floats on a mismatched tint.
+   */
+  --menu-bar-icon: var(--md-sys-color-on-surface-variant);
+  --menu-bar-label: var(--md-sys-color-on-surface-variant);
+  --menu-bar-surface: var(--md-sys-color-surface-container);
+  --menu-bar-stroke: var(--md-sys-color-outline-variant);
+  /*
+   * The score and time chips sit *on* the menu bar, so they cannot share its surface.
+   * Both were `surface-container` / `surface-container-low`, which in light mode are
+   * #f0ebea and #f6f1f0 — a 2% difference. The chips read as washed into the bar behind
+   * them rather than as objects in their own right. `lowest` is the step that actually
+   * lifts them: white on light, near-black on dark. Same reasoning for header buttons,
+   * which sit on the same bar.
+   */
+  --score-chip-surface: var(--md-sys-color-surface-container-lowest);
+  --score-chip-stroke: var(--md-sys-color-outline-variant);
+  --header-button-surface: var(--md-sys-color-surface-container-lowest);
+  --header-button-stroke: var(--md-sys-color-outline-variant);
+  --settings-background: var(--md-sys-color-surface-container-low);
+  --preference-card: var(--md-sys-color-surface-container-lowest);
+
+  /* Shapes and elevations — drawable/*.xml, dimens.xml */
+  --menu-bar-radius: 16px;
+  --menu-bar-border: 1px solid var(--menu-bar-stroke);
+  --score-chip-radius: 16px;
+  --score-chip-border: 1px solid var(--score-chip-stroke);
+  --score-chip-shadow: 0 2px 6px rgb(0 0 0 / 35%);
+  --bar-margin: 16px;
+  --layout-padding: 15px;
+
+  /* Type scale — styles.xml TextAppearance.App.* */
+  /*
+ * Type scale.
+ *
+ * Weights raised from the original, but not as far as a first pass took them. Body copy
+ * sat at 400 and did read thin, so bodies are 500. The first attempt pushed every
+ * heading to 800 as well, which flattened the hierarchy — everything shouted at once and
+ * the scale stopped reading. Headings stay at 700.
+ *
+ * Menu labels are the one to watch: they are small, and 600 weight at that size is the
+ * worst combination on a low-resolution display — the stems are thinner than a device
+ * pixel and break up. They sit at 500 with a touch of letter-spacing to stay legible.
+ *
+ * Sizes were raised a step across the board; the previous set read small, especially on
+ * a phone where the launcher tiles carry most of the interface.
+ */
+  --type-title-large: 800 22px/1.25 var(--font-display);
+  --type-title-medium: 700 18px/1.3 var(--font-display);
+  --type-body-large: 400 16px/1.5 var(--font-sans);
+  --type-body-medium: 400 15px/1.45 var(--font-sans);
+  --type-label-large: 600 15px/1.3 var(--font-sans);
+  --type-menu-label: 600 12.5px/1.35 var(--font-sans);
+
+  color-scheme: light dark;
+}
+
+/* Dark neutrals — Solitaire values-night/colors.xml */
+[data-theme='dark'] {
+  /* The vignette has to work harder in the dark, where there is no surface to sink
+     into. Same as Blocks did with its own copy of this value. */
+  --page-vignette: color-mix(in srgb, var(--md-sys-color-scrim) 55%, transparent);
+  --md-sys-color-surface: #121212;
+  --md-sys-color-on-surface: #e8e6e3;
+  --md-sys-color-surface-container-lowest: #0c0c0c;
+  --md-sys-color-surface-container-low: #1a1a1a;
+  --md-sys-color-surface-container: #212121;
+  --md-sys-color-surface-container-high: #2c2c2c;
+  --md-sys-color-surface-container-highest: #383838;
+  --md-sys-color-surface-bright: #3f3f3f;
+  --md-sys-color-surface-dim: #121212;
+  --md-sys-color-surface-variant: #494643;
+  --md-sys-color-on-surface-variant: #cbc5c0;
+  --md-sys-color-outline: #958f8a;
+  --md-sys-color-outline-variant: #494643;
+  --md-sys-color-error: #ffb4ab;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000a;
+  --md-sys-color-on-error-container: #ffdad6;
+  --md-sys-color-inverse-surface: #e8e6e3;
+  --md-sys-color-inverse-on-surface: #2f2f2f;
+  --menu-bar-icon: var(--md-sys-color-on-surface-variant);
+  --menu-bar-label: var(--md-sys-color-on-surface-variant);
+  /* See the light block above — the dark overrides no longer use hard-coded maroon and
+     cyan-white washes, they inherit the same palette-aware roles. */
+  --menu-bar-surface: var(--md-sys-color-surface-container);
+  --menu-bar-stroke: var(--md-sys-color-outline-variant);
+  /*
+   * The score and time chips sit *on* the menu bar, so they cannot share its surface.
+   * Both were `surface-container` / `surface-container-low`, which in light mode are
+   * #f0ebea and #f6f1f0 — a 2% difference. The chips read as washed into the bar behind
+   * them rather than as objects in their own right. `lowest` is the step that actually
+   * lifts them: white on light, near-black on dark. Same reasoning for header buttons,
+   * which sit on the same bar.
+   */
+  --score-chip-surface: var(--md-sys-color-surface-container-lowest);
+  --score-chip-stroke: var(--md-sys-color-outline-variant);
+  --header-button-surface: var(--md-sys-color-surface-container-lowest);
+  --header-button-stroke: var(--md-sys-color-outline-variant);
+  --settings-background: var(--md-sys-color-surface-container-low);
+  --preference-card: var(--md-sys-color-surface-container-lowest);
+}
+
+/*
+ * SECONDARY / TERTIARY.
+ *
+ * Added because games need a second and a third accent hue. The card games only
+ * ever paint `primary`, but Block's "Vault" meter, its streak meter and Word
+ * Puzzle's gradient partner all need to be visibly *other* colours, and a game
+ * that invented its own hex for those would be exactly the fixed palette this
+ * file exists to prevent. `secondary` and `tertiary` are the rest of the
+ * Material 3 role set for each scheme, so the four palettes stay the whole
+ * palette and the games stay consumers of it.
+ */
+
+/*
+ * The default palette, as plain CSS.
+ *
+ * `data-palette` is set by JS from localStorage, so before that runs — and permanently
+ * if it never runs — the root element carried no `--md-sys-color-primary` at all. Every
+ * accent in the shell resolved to an invalid value and painted as nothing, which is a
+ * visible flash on first paint rather than a theoretical one.
+ *
+ * These are navy's light-scheme values, mirroring `[data-palette='navy']` below. Same
+ * specificity, and deliberately earlier in the file, so any real `data-palette` still
+ * wins. DEFAULT_THEME_COLOR in theme.js / theme-game.js / games/pacman/theme.js and the
+ * card engine's Preferences.js must agree with this block.
+ */
+:root {
+  --md-sys-color-primary: #1b3b6f;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d4e3ff;
+  --md-sys-color-on-primary-container: #001c3b;
+  --md-sys-color-secondary: #4a5b70;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #d4e3ff;
+  --md-sys-color-on-secondary-container: #0b1b2d;
+  --md-sys-color-tertiary: #565e71;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #dae2f9;
+  --md-sys-color-on-tertiary-container: #131c2c;
+  --theme-game-select-background: #0d2340;
+  --theme-game-select-background-end: #081629;
+  --theme-color-drawer-selected: #cfe0fb;
+}
+
+/*
+ * Palette roles. Only the roles this shell actually paints are ported — the secondary
+ * and tertiary containers of the Android theme are unused outside the card table.
+ */
+[data-palette='orange'] {
+  --md-sys-color-primary: #8b5000;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ffdcc2;
+  --md-sys-color-on-primary-container: #2c1500;  --md-sys-color-secondary: #6f4a8c;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #edd9ff;
+  --md-sys-color-on-secondary-container: #25073a;
+  --md-sys-color-tertiary: #00696e;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #9df0f6;
+  --md-sys-color-on-tertiary-container: #002022;
+  --theme-game-select-background: #bf360c;
+  --theme-game-select-background-end: #7e2202;
+  --theme-color-drawer-selected: #ffe0b2;
+}
+
+[data-palette='green'] {
+  --md-sys-color-primary: #1b6b37;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #a8f2ad;
+  --md-sys-color-on-primary-container: #002106;  --md-sys-color-secondary: #6f4a8c;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #edd9ff;
+  --md-sys-color-on-secondary-container: #25073a;
+  --md-sys-color-tertiary: #00696e;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #9df0f6;
+  --md-sys-color-on-tertiary-container: #002022;
+  --theme-game-select-background: #14532d;
+  --theme-game-select-background-end: #0b3b1e;
+  --theme-color-drawer-selected: #c8e6c9;
+}
+
+[data-palette='blue'] {
+  --md-sys-color-primary: #1565c0;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d6e3ff;
+  --md-sys-color-on-primary-container: #001b3f;  --md-sys-color-secondary: #6f4a8c;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #edd9ff;
+  --md-sys-color-on-secondary-container: #25073a;
+  --md-sys-color-tertiary: #00696e;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #9df0f6;
+  --md-sys-color-on-tertiary-container: #002022;
+  --theme-game-select-background: #0d47a1;
+  --theme-game-select-background-end: #082f66;
+  --theme-color-drawer-selected: #bbdefb;
+}
+
+[data-palette='purple'] {
+  --md-sys-color-primary: #6a1b9a;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #f3daff;
+  --md-sys-color-on-primary-container: #260046;  --md-sys-color-secondary: #8f4d00;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #ffddb8;
+  --md-sys-color-on-secondary-container: #2d1500;
+  --md-sys-color-tertiary: #00696e;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #9df0f6;
+  --md-sys-color-on-tertiary-container: #002022;
+  --theme-game-select-background: #3f0f5e;
+  --theme-game-select-background-end: #27093b;
+  --theme-color-drawer-selected: #e1bee7;
+}
+
+/*
+ * Four more palettes, added so the picker is a real choice rather than four options.
+ * Rose, Teal, Amber and Slate fill the gaps the original set left: there was no warm
+ * red, no cool cyan, no gold, and nothing neutral at all. Slate in particular gives a
+ * calm, near-achromatic option for anyone who finds the saturated greens tiring.
+ *
+ * Every block carries the full Material 3 role set in both schemes, because these roles
+ * are read directly by the chrome, the dialogs and the games — a partial block would
+ * fall through to the previous palette's values and produce a mismatched UI.
+ */
+[data-palette='rose'] {
+  --md-sys-color-primary: #a8274e;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ffd9e1;
+  --md-sys-color-on-primary-container: #3f0018;
+  --md-sys-color-secondary: #75565a;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #ffd9e0;
+  --md-sys-color-on-secondary-container: #2c1519;
+  --md-sys-color-tertiary: #7c5635;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #ffdbbe;
+  --md-sys-color-on-tertiary-container: #2f1500;
+  --theme-game-select-background: #7b1f3a;
+  --theme-game-select-background-end: #4f1124;
+  --theme-color-drawer-selected: #f9d9e0;
+}
+
+[data-palette='teal'] {
+  --md-sys-color-primary: #006a60;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #9df2e7;
+  --md-sys-color-on-primary-container: #00201c;
+  --md-sys-color-secondary: #4a6360;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #cce8e3;
+  --md-sys-color-on-secondary-container: #06201d;
+  --md-sys-color-tertiary: #456179;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #cbe6ff;
+  --md-sys-color-on-tertiary-container: #001e31;
+  --theme-game-select-background: #0b4f49;
+  --theme-game-select-background-end: #06332f;
+  --theme-color-drawer-selected: #b2dfd7;
+}
+
+[data-palette='amber'] {
+  --md-sys-color-primary: #8a5a00;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ffddb0;
+  --md-sys-color-on-primary-container: #2c1800;
+  --md-sys-color-secondary: #6c5c3f;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #f5e0bb;
+  --md-sys-color-on-secondary-container: #251a04;
+  --md-sys-color-tertiary: #4c6545;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #ceeabd;
+  --md-sys-color-on-tertiary-container: #0a1f08;
+  --theme-game-select-background: #6b4a12;
+  --theme-game-select-background-end: #44300a;
+  --theme-color-drawer-selected: #ffe1b8;
+}
+
+[data-palette='slate'] {
+  --md-sys-color-primary: #4f5b66;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d6e2ee;
+  --md-sys-color-on-primary-container: #0b1923;
+  --md-sys-color-secondary: #525f6a;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #d6e4f1;
+  --md-sys-color-on-secondary-container: #0d1c27;
+  --md-sys-color-tertiary: #5c5f6b;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #e2e2ec;
+  --md-sys-color-on-tertiary-container: #191b24;
+  --theme-game-select-background: #37424c;
+  --theme-game-select-background-end: #232b33;
+  --theme-color-drawer-selected: #d3dde6;
+}
+
+[data-palette='navy'] {
+  --md-sys-color-primary: #1b3b6f;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d4e3ff;
+  --md-sys-color-on-primary-container: #001c3b;
+  --md-sys-color-secondary: #4a5b70;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #d4e3ff;
+  --md-sys-color-on-secondary-container: #0b1b2d;
+  --md-sys-color-tertiary: #565e71;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #dae2f9;
+  --md-sys-color-on-tertiary-container: #131c2c;
+  --theme-game-select-background: #0d2340;
+  --theme-game-select-background-end: #081629;
+  --theme-color-drawer-selected: #cfe0fb;
+}
+
+[data-palette='indigo'] {
+  --md-sys-color-primary: #4b52c4;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #e0e0ff;
+  --md-sys-color-on-primary-container: #000f5c;
+  --md-sys-color-secondary: #5b5d72;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #e0e0f9;
+  --md-sys-color-on-secondary-container: #181a2c;
+  --md-sys-color-tertiary: #77536d;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #ffd7f1;
+  --md-sys-color-on-tertiary-container: #2d1228;
+  --theme-game-select-background: #2c3080;
+  --theme-game-select-background-end: #1b1e56;
+  --theme-color-drawer-selected: #dcdcff;
+}
+
+[data-palette='lime'] {
+  --md-sys-color-primary: #4a6700;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #c9f27f;
+  --md-sys-color-on-primary-container: #142100;
+  --md-sys-color-secondary: #57643a;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #daeab6;
+  --md-sys-color-on-secondary-container: #151e00;
+  --md-sys-color-tertiary: #39656b;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #bfeaf1;
+  --md-sys-color-on-tertiary-container: #001f24;
+  --theme-game-select-background: #2f5000;
+  --theme-game-select-background-end: #1d3300;
+  --theme-color-drawer-selected: #cbf19b;
+}
+
+[data-palette='crimson'] {
+  --md-sys-color-primary: #8c1d18;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ffdad6;
+  --md-sys-color-on-primary-container: #410002;
+  --md-sys-color-secondary: #775652;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #ffdad6;
+  --md-sys-color-on-secondary-container: #2d1512;
+  --md-sys-color-tertiary: #705c2e;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #fbdfa6;
+  --md-sys-color-on-tertiary-container: #261900;
+  --theme-game-select-background: #6b1611;
+  --theme-game-select-background-end: #450d0a;
+  --theme-color-drawer-selected: #f9d9d6;
+}
+
+[data-theme='dark'][data-palette='navy'] {
+  --md-sys-color-primary: #a8c8ff;
+  --md-sys-color-on-primary: #00315e;
+  --md-sys-color-primary-container: #1b3b6f;
+  --md-sys-color-on-primary-container: #d4e3ff;
+  --md-sys-color-secondary: #b9c8db;
+  --md-sys-color-on-secondary: #23313f;
+  --md-sys-color-secondary-container: #3a495a;
+  --md-sys-color-on-secondary-container: #d4e3ff;
+  --md-sys-color-tertiary: #bec6dc;
+  --md-sys-color-on-tertiary: #28303f;
+  --md-sys-color-tertiary-container: #3e4759;
+  --md-sys-color-on-tertiary-container: #dae2f9;
+  --theme-color-drawer-selected: #1b3b6f;
+}
+
+[data-theme='dark'][data-palette='indigo'] {
+  --md-sys-color-primary: #bec2ff;
+  --md-sys-color-on-primary: #141e9e;
+  --md-sys-color-primary-container: #333bcb;
+  --md-sys-color-on-primary-container: #e0e0ff;
+  --md-sys-color-secondary: #c3c5dd;
+  --md-sys-color-on-secondary: #2c2f42;
+  --md-sys-color-secondary-container: #424659;
+  --md-sys-color-on-secondary-container: #e0e0f9;
+  --md-sys-color-tertiary: #e6b9d8;
+  --md-sys-color-on-tertiary: #45263d;
+  --md-sys-color-tertiary-container: #5d3b55;
+  --md-sys-color-on-tertiary-container: #ffd7f1;
+  --theme-color-drawer-selected: #333bcb;
+}
+
+[data-theme='dark'][data-palette='lime'] {
+  --md-sys-color-primary: #aed65f;
+  --md-sys-color-on-primary: #253500;
+  --md-sys-color-primary-container: #354d00;
+  --md-sys-color-on-primary-container: #c9f27f;
+  --md-sys-color-secondary: #bfcaa0;
+  --md-sys-color-on-secondary: #2a3514;
+  --md-sys-color-secondary-container: #404b29;
+  --md-sys-color-on-secondary-container: #daeab6;
+  --md-sys-color-tertiary: #a3ced5;
+  --md-sys-color-on-tertiary: #07363d;
+  --md-sys-color-tertiary-container: #204d54;
+  --md-sys-color-on-tertiary-container: #bfeaf1;
+  --theme-color-drawer-selected: #354d00;
+}
+
+[data-theme='dark'][data-palette='crimson'] {
+  --md-sys-color-primary: #ffb4ab;
+  --md-sys-color-on-primary: #5f0b06;
+  --md-sys-color-primary-container: #7c1d18;
+  --md-sys-color-on-primary-container: #ffdad6;
+  --md-sys-color-secondary: #e7bdb8;
+  --md-sys-color-on-secondary: #442926;
+  --md-sys-color-secondary-container: #5d3d3a;
+  --md-sys-color-on-secondary-container: #ffdad6;
+  --md-sys-color-tertiary: #dec48c;
+  --md-sys-color-on-tertiary: #3f2e06;
+  --md-sys-color-tertiary-container: #574516;
+  --md-sys-color-on-tertiary-container: #fbdfa6;
+  --theme-color-drawer-selected: #7c1d18;
+}
+
+[data-theme='dark'][data-palette='rose'] {
+  --md-sys-color-primary: #ffb0c1;
+  --md-sys-color-on-primary: #5e1130;
+  --md-sys-color-primary-container: #86203f;
+  --md-sys-color-on-primary-container: #ffd9e1;
+  --md-sys-color-secondary: #e3bdc2;
+  --md-sys-color-on-secondary: #42292d;
+  --md-sys-color-secondary-container: #5a3f44;
+  --md-sys-color-on-secondary-container: #ffd9e0;
+  --md-sys-color-tertiary: #ecbe98;
+  --md-sys-color-on-tertiary: #452a0d;
+  --md-sys-color-tertiary-container: #5f4122;
+  --md-sys-color-on-tertiary-container: #ffdbbe;
+  --theme-color-drawer-selected: #86203f;
+}
+
+[data-theme='dark'][data-palette='teal'] {
+  --md-sys-color-primary: #81d5cb;
+  --md-sys-color-on-primary: #003731;
+  --md-sys-color-primary-container: #005048;
+  --md-sys-color-on-primary-container: #9df2e7;
+  --md-sys-color-secondary: #b0ccc7;
+  --md-sys-color-on-secondary: #1c3531;
+  --md-sys-color-secondary-container: #334b47;
+  --md-sys-color-on-secondary-container: #cce8e3;
+  --md-sys-color-tertiary: #aacbe5;
+  --md-sys-color-on-tertiary: #123549;
+  --md-sys-color-tertiary-container: #2c4b62;
+  --md-sys-color-on-tertiary-container: #cbe6ff;
+  --theme-color-drawer-selected: #005048;
+}
+
+[data-theme='dark'][data-palette='amber'] {
+  --md-sys-color-primary: #f7bd6a;
+  --md-sys-color-on-primary: #492900;
+  --md-sys-color-primary-container: #693c00;
+  --md-sys-color-on-primary-container: #ffddb0;
+  --md-sys-color-secondary: #d8c4a0;
+  --md-sys-color-on-secondary: #3b2f15;
+  --md-sys-color-secondary-container: #52452a;
+  --md-sys-color-on-secondary-container: #f5e0bb;
+  --md-sys-color-tertiary: #b2ce9f;
+  --md-sys-color-on-tertiary: #1d360d;
+  --md-sys-color-tertiary-container: #364d28;
+  --md-sys-color-on-tertiary-container: #ceeabd;
+  --theme-color-drawer-selected: #693c00;
+}
+
+[data-theme='dark'][data-palette='slate'] {
+  --md-sys-color-primary: #bac7d4;
+  --md-sys-color-on-primary: #243039;
+  --md-sys-color-primary-container: #374754;
+  --md-sys-color-on-primary-container: #d6e2ee;
+  --md-sys-color-secondary: #bdc8d4;
+  --md-sys-color-on-secondary: #27313a;
+  --md-sys-color-secondary-container: #3d4752;
+  --md-sys-color-on-secondary-container: #d6e4f1;
+  --md-sys-color-tertiary: #c5c6d0;
+  --md-sys-color-on-tertiary: #2e303a;
+  --md-sys-color-tertiary-container: #454750;
+  --md-sys-color-on-tertiary-container: #e2e2ec;
+  --theme-color-drawer-selected: #374754;
+}
+
+/* Dark primaries — Solitaire DARK_PALETTES. The playfield gradient stays the same. */
+[data-theme='dark'][data-palette='orange'] {
+  --md-sys-color-primary: #e8a872;
+  --md-sys-color-on-primary: #412300;
+  --md-sys-color-primary-container: #5c3a1a;
+  --md-sys-color-on-primary-container: #ffdcc2;  --md-sys-color-secondary: #d3b0e8;
+  --md-sys-color-on-secondary: #3a1a52;
+  --md-sys-color-secondary-container: #513065;
+  --md-sys-color-on-secondary-container: #edd9ff;
+  --md-sys-color-tertiary: #82d4da;
+  --md-sys-color-on-tertiary: #00373a;
+  --md-sys-color-tertiary-container: #004f52;
+  --md-sys-color-on-tertiary-container: #9df0f6;
+  --theme-color-drawer-selected: #5c3a1a;
+}
+
+[data-theme='dark'][data-palette='green'] {
+  --md-sys-color-primary: #7fcb8c;
+  --md-sys-color-on-primary: #003918;
+  --md-sys-color-primary-container: #1e4a2c;
+  --md-sys-color-on-primary-container: #b8f0bd;  --md-sys-color-secondary: #d3b0e8;
+  --md-sys-color-on-secondary: #3a1a52;
+  --md-sys-color-secondary-container: #513065;
+  --md-sys-color-on-secondary-container: #edd9ff;
+  --md-sys-color-tertiary: #82d4da;
+  --md-sys-color-on-tertiary: #00373a;
+  --md-sys-color-tertiary-container: #004f52;
+  --md-sys-color-on-tertiary-container: #9df0f6;
+  --theme-color-drawer-selected: #1e4a2c;
+}
+
+[data-theme='dark'][data-palette='blue'] {
+  --md-sys-color-primary: #9ebeff;
+  --md-sys-color-on-primary: #002e5c;
+  --md-sys-color-primary-container: #1a3f6e;
+  --md-sys-color-on-primary-container: #d6e3ff;  --md-sys-color-secondary: #d3b0e8;
+  --md-sys-color-on-secondary: #3a1a52;
+  --md-sys-color-secondary-container: #513065;
+  --md-sys-color-on-secondary-container: #edd9ff;
+  --md-sys-color-tertiary: #82d4da;
+  --md-sys-color-on-tertiary: #00373a;
+  --md-sys-color-tertiary-container: #004f52;
+  --md-sys-color-on-tertiary-container: #9df0f6;
+  --theme-color-drawer-selected: #1a3f6e;
+}
+
+[data-theme='dark'][data-palette='purple'] {
+  --md-sys-color-primary: #d5a8f0;
+  --md-sys-color-on-primary: #3a005c;
+  --md-sys-color-primary-container: #4a2a66;
+  --md-sys-color-on-primary-container: #f0d6ff;  --md-sys-color-secondary: #ffb877;
+  --md-sys-color-on-secondary: #4f2600;
+  --md-sys-color-secondary-container: #703800;
+  --md-sys-color-on-secondary-container: #ffddb8;
+  --md-sys-color-tertiary: #82d4da;
+  --md-sys-color-on-tertiary: #00373a;
+  --md-sys-color-tertiary-container: #004f52;
+  --md-sys-color-on-tertiary-container: #9df0f6;
+  --theme-color-drawer-selected: #4a2a66;
+}
+
+/*
+ * Preview values for the palette swatches in the appearance dialog. Each swatch has to
+ * show a palette that is not applied yet, so it cannot read the live custom properties.
+ */
+:root {
+  --palette-start-orange: #bf360c;
+  --palette-end-orange: #7e2202;
+  --palette-start-green: #14532d;
+  --palette-end-green: #0b3b1e;
+  --palette-start-blue: #0d47a1;
+  --palette-end-blue: #082f66;
+  --palette-start-purple: #3f0f5e;
+  --palette-end-purple: #27093b;
+  /* Kept in parity with games/pacman/theme.css, which builds its picker swatches from
+     these pairs. The launcher itself paints swatches from .swatch-NAME classes. */
+  --palette-start-rose: #7b1f3a;
+  --palette-end-rose: #4f1124;
+  --palette-start-teal: #0b4f49;
+  --palette-end-teal: #06332f;
+  --palette-start-amber: #6b4a12;
+  --palette-end-amber: #44300a;
+  --palette-start-slate: #37424c;
+  --palette-end-slate: #232b33;
+  --palette-start-navy: #0d2340;
+  --palette-end-navy: #081629;
+  --palette-start-indigo: #2c3080;
+  --palette-end-indigo: #1b1e56;
+  --palette-start-lime: #2f5000;
+  --palette-end-lime: #1d3300;
+  --palette-start-crimson: #6b1611;
+  --palette-end-crimson: #450d0a;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  /*
+   * The surface colour goes on `html` only. Giving it to `body` as well meant the
+   * body painted over the grid/vignette backdrop beneath it, which is what left the
+   * app looking like it had no backdrop at all until this was split apart.
+   */
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--font-sans);
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/*
+ * Removed: this used to be a second `html { background: … }` rule painting the palette
+ * gradient, immediately followed by an identical-selector rule painting `surface`
+ * instead. The second won, so the first — and the five-line comment explaining why the
+ * gradient belonged on the root element — did nothing. The surfaces below own the
+ * background; the backdrop is painted by `html::before` / `html::after`.
+ */
+html {
+  background: var(--md-sys-color-surface);
+}
+
+body {
+  background: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+#canvas {
+  display: block;
+  border-radius: 18px;
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+}
+
+/* ------------------------------------------------------------ shared backdrop */
+
+/*
+ * Two fixed pseudo-elements paint the app-wide backdrop: a square grid, masked so it
+ * dissolves toward the edges, over a soft vignette.
+ *
+ * This started life as Blocks' own background and is now the app's, so the five games
+ * read as one product rather than five that happen to share a palette.
+ *
+ * They live on `html`, not `body`, because several games set their own
+ * `html, body { height: 100dvh }` or `overflow: hidden`, and Pac-Man's renderer writes
+ * an inline margin onto `body`.
+ *
+ * z-index: -1 is load-bearing, not decoration. `::after` is the last child of `html`,
+ * so at z-index 0 it painted *after* `body` — which put the dark theme's 55%-black
+ * vignette on top of every game. The canvas held perfectly white cards underneath it
+ * and the board came out grey. The backdrop is painted below all content because
+ * `body` is transparent here and the surface colour lives on `html` instead; see the
+ * `html` rule in theme.css.
+ */
+html::before,
+html::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/*
+ * The grid itself.
+ *
+ * `mask-image` used to fade the grid out radially from the centre. That mask is what
+ * made it look ragged: a mask multiplies down to a partial alpha across each line's
+ * edge, so at fractional device-pixel ratios (1.25 here) the lines stopped covering a
+ * whole device pixel and rendered as broken dashes rather than continuous rules.
+ *
+ * So: no mask, and a uniform line. The fade is done by the vignette in `::after`
+ * instead, which is a smooth gradient over a large area and does not fragment. The
+ * line is 1px, which Chromium already snaps to a whole device pixel.
+ */
+html::before {
+  background-image:
+    linear-gradient(var(--page-grid-ink) 1px, transparent 1px),
+    linear-gradient(90deg, var(--page-grid-ink) 1px, transparent 1px);
+  background-size: var(--page-grid-size) var(--page-grid-size);
+  /* Anchored so the grid does not jump when the window resizes. */
+  background-position: -1px -1px;
+}
+
+html::after {
+  /*
+   * The vignette now does the fading the grid mask used to do, over the whole viewport
+   * rather than per-line, so it dims the corners without fragmenting the rules.
+   */
+  background: radial-gradient(ellipse 85% 80% at 50% 42%, transparent 45%, var(--page-vignette) 100%);
+}
+
+/* The vignette is decorative; drop it when the OS asks for less transparency. */
+@media (prefers-reduced-transparency: reduce) {
+  html::after {
+    display: none;
+  }
+}
+
+/* ----------------------------------------------------------------- shell chrome */
+
+.shell {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  /* The layer itself never eats input: only its controls do. */
+  pointer-events: none;
+  z-index: 10;
+}
+
+.shell > * {
+  pointer-events: auto;
+}
+
+.shell-bar {
+  display: flex;
+  align-items: center;
+  /*
+   * Wraps, so `.shell-title` can take a line of its own on a narrow screen. Without it
+   * the bar is `nowrap`, a `flex-basis: 100%` title has nowhere to go, and the four
+   * controls are pushed off the right edge with no way to scroll to them — which is the
+   * exact failure the sizing below this rule exists to prevent.
+   */
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 8px 0;
+  padding: 6px 10px;
+  background: var(--menu-bar-surface);
+  border: var(--menu-bar-border);
+  border-radius: var(--menu-bar-radius);
+  box-shadow: var(--score-chip-shadow);
+  max-width: calc(100vw - 16px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/*
+ * The app's name in the bar.
+
+ * `margin-right: auto` rather than `justify-content` on the bar: the four controls should
+ * sit at the far end whatever else is in the row, and the bar itself is also used by the
+ * stage, where the title is centred instead.
+ *
+ * It is allowed to shrink and ellipsise rather than pushing anything: `.header-button` is
+ * `flex: none` because a control that can be squeezed is a control that has moved out from
+ * under the finger. Below 560px it takes a whole line of its own instead (see the media
+ * query below), which is the only way both survive a 360px phone.
+ */
+.shell-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-right: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--md-sys-color-on-surface);
+  font: var(--type-title-medium);
+  letter-spacing: 0.02em;
+}
+
+/*
+   Narrow screens: the controls have to FIT, not scroll.
+
+   `.header-button` is `flex: none` and `html, body` are `overflow: hidden`, so nothing
+   could give: past ~620px the bar's content was simply wider than its box and Theme
+   and About were clipped off the right edge with no way to scroll to them. Measured at
+   360px the bar wanted 456px in a 342px box.
+
+   An `overflow-x: auto` backstop was tried first and rejected — it made the controls
+   reachable but meant scrolling sideways to reach About on every phone. The bar now
+   actually fits: the controls shrink to a 44px touch target, and below 560px the title
+   moves onto a line of its own rather than being dropped. The tab title, the footer and
+   the window all say Seclusa regardless.
+*/
+@media (max-width: 620px) {
+  .shell-bar .header-button {
+    padding: 12px 14px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+}
+
+/*
+ * The title moves onto its own line only when it has to.
+ *
+ * A separate query from the button shrink above, because the two run out of room at
+ * different widths: the buttons need the smaller padding from 620px down, but the title
+ * and the buttons together still fit on one line to about 560px. Wrapping at 620 threw
+ * away a line's worth of height for nothing between 560 and 620.
+ *
+ * `flex-basis: 100%` takes the whole row and `order: -1` keeps the title first — without
+ * the order it drops below the controls. The bar wraps rather than overflowing, which is
+ * the whole point: it grew by one line instead of pushing About off the right edge, where
+ * nothing could reach it.
+ */
+@media (max-width: 560px) {
+  .shell-bar .shell-title {
+    flex: 0 0 100%;
+    order: -1;
+    margin-right: 0;
+    padding: 2px 4px 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .shell-bar .header-button {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+}
+
+
+
+.header-button {
+  flex: none;
+  padding: 13px 24px;
+  background: var(--header-button-surface);
+  border: 2px solid var(--header-button-stroke);
+  /*
+   * Overhauled. These were inheriting the shared 16px `menu-bar-radius`, so they read as
+   * the same soft lozenge as the bar they sit in — no separation, no hierarchy. They
+   * are now square-ish with a 8px radius so they sit as distinct controls, on a filled
+   * surface with a real 2px edge, in the heaviest weight the family ships.
+   */
+  border-radius: 8px;
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 80ms ease;
+}
+
+/* Hover/focus is a real affordance, not just a colour swap — these are the app's
+   only navigation on this screen. */
+.header-button:hover {
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-primary);
+}
+
+.header-button:active {
+  transform: scale(0.97);
+}
+
+.header-button:focus-visible {
+  outline: 3px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.header-button:active {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+}
+
+/*
+ * Pressed state for a header control (the Sound pill).
+ *
+ * This set the background to `primary` but left the text at its inherited
+ * `on-surface`. In a light scheme that is dark text on a dark fill, and in dark it is
+ * near-white on a pale blue — 1.36:1 either way, measured, and visibly washed out. A
+ * filled control has to pick up `on-primary` with the fill, which is the whole point of
+ * the pairing.
+ */
+.header-button[aria-pressed='true'] {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.shell-hint {
+  margin-bottom: calc(8px + env(safe-area-inset-bottom));
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/*
+ * The score, lives and fruit rows sit at the top and bottom edges of the canvas, so the
+ * chrome gets out of the way while nobody is using it — the same menu-peek behaviour the
+ * Solitaire menu bar has. Any pointer activity (or a tap on the top/bottom strip) brings
+ * it back.
+ */
+.shell.is-idle .shell-bar {
+  opacity: 0;
+  transform: translateY(-120%);
+  pointer-events: none;
+}
+
+.shell.is-idle .shell-hint {
+  opacity: 0;
+  transform: translateY(120%);
+  pointer-events: none;
+}
+
+@media (max-width: 560px) {
+  .shell-hint {
+    display: none;
+  }
+}
+
+/* score_chip_background.xml — 16dp radius, 6dp elevation */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  max-height: 100%;
+  padding: 4px 12px;
+  border: var(--score-chip-border);
+  border-radius: var(--score-chip-radius);
+  background: var(--score-chip-surface);
+  box-shadow: var(--score-chip-shadow);
+  color: var(--ui-text-color, var(--menu-bar-label));
+  font: var(--type-menu-label);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  line-height: normal;
+}
+
+@media (max-width: 560px) {
+  .shell-hint {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------- shared scale */
+
+/*
+ * One panel radius for the whole app.
+ *
+ * Blocks, Word Puzzle and the dialogs each carried their own corner treatment:
+ * 32px/8px/26px/12px on the Blocks board, 16px/6px in its phone breakpoint, 14px on
+ * Word Puzzle's cards and on every dialog. Three games therefore had four different
+ * ideas of what a panel looks like, which is part of why the two DOM games read as
+ * unrelated to each other.
+ *
+ * Defined once here so the games consume it rather than each picking a number. The
+ * rules that read these are below.
+ */
+:root {
+  --panel-radius: 18px;
+  --panel-radius-sm: 12px;
+}
+
+/* ------------------------------------------------------------------- how to play */
+
+.help-rules {
+    margin: 0;
+    padding: 0 0 0 22px;
+    font: var(--type-body-large);
+    line-height: 1.6;
+}
+
+.help-rules li {
+    margin: 0 0 8px;
+}
+
+/* A sub-heading inside a game section, e.g. "The tools" under Blocks. Sits below the
+   h2 in the hierarchy without pretending to be a top-level section. */
+.help-subhead {
+    margin: 20px 0 8px;
+    font: var(--type-title-medium);
+    color: var(--md-sys-color-on-surface);
+}
+
+/* ---------------------------------------------------------------------- dialogs */
+
+.dialog-scrim {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 420px);
+  max-height: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--settings-background);
+  color: var(--md-sys-color-on-surface);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.app-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.app-bar-title {
+  flex: 1;
+  font: var(--type-title-large);
+  letter-spacing: 0.02em;
+}
+
+.app-bar button {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  color: var(--md-sys-color-on-primary);
+  border-radius: 50%;
+}
+
+.app-bar button:active {
+  background: rgb(255 255 255 / 20%);
+}
+
+.doc {
+  flex: 1;
+  /*
+   * `min-height: 0` is load-bearing. A flex item defaults to `min-height: auto`,
+   * which means it refuses to shrink below its content — so the `overflow-y: auto`
+   * below never engages and the dialog's tail (Your data, Clear data) is silently
+   * clipped instead of scrollable. It only stayed hidden while the palette grid was
+   * four rows tall and the content happened to fit.
+   */
+  min-height: 0;
+  overflow-y: auto;
+  /* Stop the scroll chaining to the page behind the scrim on touch devices. */
+  overscroll-behavior: contain;
+  padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+  background: var(--settings-background);
+}
+
+.doc h2 {
+  margin: 18px 0 8px;
+  font: var(--type-title-large);
+  color: var(--md-sys-color-primary);
+}
+
+.doc h2:first-child {
+  margin-top: 0;
+}
+
+.doc p,
+.doc li {
+  font: var(--type-body-large);
+  line-height: 1.55;
+}
+
+.doc ul {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+
+.doc .card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--preference-card);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  margin-bottom: 12px;
+}
+
+.doc .card-title {
+  font: var(--type-title-medium);
+  margin-bottom: 6px;
+}
+
+.doc .card-body {
+  font: var(--type-body-medium);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.doc .row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font: var(--type-body-medium);
+  padding: 3px 0;
+}
+
+.doc .row-label {
+  flex: none;
+  min-width: 128px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.doc .row-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+}
+
+.link {
+  color: var(--md-sys-color-primary);
+  text-decoration: underline;
+}
+
+/* A link-shaped affordance that is deliberately not a link yet — used for
+   "source not published" until there is somewhere to send people. Kept non-focusable
+   and without a pointer so it cannot be mistaken for something clickable. */
+.link.is-pending {
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: none;
+  opacity: 0.6;
+  cursor: default;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+}
+
+.pill-choice {
+  padding: 8px 14px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 18px;
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  font: var(--type-body-medium);
+}
+
+.pill-choice.is-selected {
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+/* Destructive action — the one control in the app that can erase data. Uses the error
+   colour role so it is never mistaken for a neutral choice. */
+.pill-choice.is-destructive {
+  border-color: var(--md-sys-color-error);
+  background: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
+}
+
+
+.switch {
+  position: relative;
+  width: 52px;
+  height: 32px;
+  flex: none;
+  border-radius: 16px;
+  background: var(--md-sys-color-surface-container-highest);
+  transition: background 0.15s;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--md-sys-color-outline);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.switch.is-on {
+  background: var(--md-sys-color-primary);
+}
+
+.switch.is-on::after {
+  transform: translateX(20px);
+  background: var(--md-sys-color-on-primary);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch,
+  .switch::after {
+    transition: none;
+  }
+
+  .shell-bar,
+  .shell-hint {
+    transition: none;
+  }
+}
