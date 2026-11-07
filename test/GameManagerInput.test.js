@@ -515,10 +515,10 @@ describe('GameManager footer inset', () => {
         const boxes = gm.computeBoxes();
         const viewportH = Math.max(1, window.innerHeight - foot.offsetHeight);
         if (boxes.isLandscape || !boxes.menuAtBottom) {
-            expect(boxes.chromeBar.top).toBe(viewportH - 64);
+            expect(boxes.chromeBar.top).toBe(viewportH - 48);
         } else {
             expect(boxes.menuBar.top).toBe(viewportH - 16 - 72);
-            expect(boxes.chromeBar.top).toBe(boxes.menuBar.top - 64);
+            expect(boxes.chromeBar.top).toBe(boxes.menuBar.top - 48);
         }
     });
 
@@ -528,7 +528,7 @@ describe('GameManager footer inset', () => {
         const boxes = gm.computeBoxes();
         const viewportH = Math.max(1, window.innerHeight);
         if (boxes.isLandscape || !boxes.menuAtBottom) {
-            expect(boxes.chromeBar.top).toBe(viewportH - 40 - 64);
+            expect(boxes.chromeBar.top).toBe(viewportH - 40 - 48);
         } else {
             expect(boxes.menuBar.top).toBe(viewportH - 40 - 16 - 72);
         }

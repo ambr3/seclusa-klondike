@@ -16,7 +16,7 @@ window.STAND_COPY = {
     "Hint opens a move hint or the full rules. Settings holds sound, card backs and the rest."
   ],
   "about": [
-    "Classic solitaire. Forked from Tobias Bielefeld's Simple Solitaire Collection (GPL-3.0), by way of Seclusa Solitaire.",
-    "No ads, no tracking. Games and settings stay on this device."
+    "Simple Solitaire Collection - https://github.com/TobiasBielefeld/Simple-Solitaire - Copyright 2016 - Tobias Bielefeld - tobias.bielefeld@gmail.com - Licensed under GPLv3+ https://www.gnu.org/licenses/gpl-3.0",
+    "Modified to run Klondike in the browser, with no ads and no tracking. Games and settings stay on this device."
   ]
 };

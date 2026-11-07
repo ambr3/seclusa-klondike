@@ -45,17 +45,22 @@ export class Klondike extends Game {
         this.setUpCardWidth(layout, 8, 10);
         // calculate spacing and start position of cards
         const spacing = this.setUpHorizontalSpacing(layout, 7, 8);
+        // Keep the normal tight fan, but drop the whole deal into the empty band
+        // above the score row instead of parking it under the top edge.
+        const topPad = (layout.isLandscape ? Card.width / 4 : Card.width / 2) + 1;
+        const sink = Math.trunc(Math.max(0, layout.height - Card.height * 4) * 0.28);
+        const rowY = topPad + sink;
         let startPos = layout.width / 2 - Card.width / 2 - 3 * Card.width - 3 * spacing;
         // first order the foundation stacks
         for (let i = 0; i < 4; i++) {
             shared.stacks[7 + i].setX(startPos + spacing * i + Card.width * i);
-            shared.stacks[7 + i].setY((layout.isLandscape ? Card.width / 4 : Card.width / 2) + 1);
+            shared.stacks[7 + i].setY(rowY);
         }
         // then the trash and main stacks
         startPos = layout.width - 2 * spacing - 3 * Card.width;
         for (let i = 0; i < 3; i++) {
             shared.stacks[11 + i].setX(startPos + (Card.width / 2) * i);
-            shared.stacks[11 + i].setY((layout.isLandscape ? Card.width / 4 : Card.width / 2) + 1);
+            shared.stacks[11 + i].setY(rowY);
         }
         shared.stacks[14].setX(shared.stacks[13].getX() + Card.width + spacing);
         shared.stacks[14].setY(shared.stacks[13].getY());

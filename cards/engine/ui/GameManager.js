@@ -52,7 +52,7 @@ const DOUBLE_TAP_SPEED = 400; // time delta between two taps, in ms
 /** dimens.xml, converted from dp to CSS pixels. */
 const DP = {
     barMargin: 16,
-    bottomChrome: 64,
+    bottomChrome: 48,
     /* Capsule: 56px thumb hits + 8px pad each side. */
     menuBarHeight: 72,
     menuBarWidth: 72,

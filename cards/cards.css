@@ -249,9 +249,10 @@ button {
 .chrome-bar {
   position: absolute;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   height: var(--bottom-chrome-height);
+  padding-bottom: 2px;
   pointer-events: none;
 }
 
