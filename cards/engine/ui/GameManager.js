@@ -406,23 +406,33 @@ export class GameManager {
             const availableHeight = Math.max(0, viewportH - top - bottomInset - barMargin * 2);
             const barHeight = Math.min(availableHeight, DP.menuBarLandscapeMaxHeight);
             const barTop = top + barMargin + Math.round((availableHeight - barHeight) / 2);
-            // LEFT_OF / RIGHT_OF pins the far edge to the bar and leaves the near edge on the
-            // parent, so both boxes are trimmed where the vertical bar begins.
-            const chromeLeft = menuOnRight ? left : railLeft + barWidth;
-            const chromeRight = menuOnRight ? railLeft : viewportW - right;
-            const chromeBar = {
-                left: chromeLeft,
-                top: viewportH - bottomInset - DP.bottomChrome,
-                width: Math.max(0, chromeRight - chromeLeft),
-                height: DP.bottomChrome,
-            };
+            // Playfield still clears the menu rail; the score/time strip does not —
+            // the rail is mid-height, so the bottom row can run edge to edge.
+            const fieldLeft = menuOnRight ? left : railLeft + barWidth;
+            const fieldRight = menuOnRight ? railLeft : viewportW - right;
+            // Score/time share the licence footer's bottom strip — one level, not a
+            // second row sitting on top of the credit line. Full width so Time sits
+            // on the far right (and Score on the far left).
+            const chromeBar = foot > 0
+                ? {
+                    left,
+                    top: viewportH,
+                    width: Math.max(0, viewportW - left - right),
+                    height: foot,
+                }
+                : {
+                    left,
+                    top: viewportH - bottomInset - DP.bottomChrome,
+                    width: Math.max(0, viewportW - left - right),
+                    height: DP.bottomChrome,
+                };
             // params2 adds the layout margin to whichever edge is NOT the RelativeLayout anchor,
             // so a menu on the left pushes the playfield right, and a menu on the right leaves it
             // against the parent edge.
             const playfield = {
-                left: chromeLeft + margin,
+                left: fieldLeft + margin,
                 top,
-                width: Math.max(0, chromeRight - chromeLeft - margin * 2),
+                width: Math.max(0, fieldRight - fieldLeft - margin * 2),
                 height: Math.max(0, chromeBar.top - top),
             };
             return {
@@ -437,7 +447,7 @@ export class GameManager {
                 },
                 chromeBar,
                 playfield,
-                overlayUpper: { left: chromeLeft, top, width: chromeBar.width, height: playfield.height },
+                overlayUpper: { left: fieldLeft, top, width: Math.max(0, fieldRight - fieldLeft), height: playfield.height },
             };
         }
         // ----------------------------------------------------------------- portrait

@@ -866,6 +866,12 @@ button {
   :root {
     --bottom-chrome-height: 56px;
   }
+
+  /* Score / credit / time share the footer strip. */
+  .chrome-bar {
+    align-items: center;
+    padding-bottom: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

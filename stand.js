@@ -125,6 +125,10 @@
         (copy.about || []).forEach(function (line) {
             sheet.appendChild(el("p", null, line));
         });
+        var versionMeta = document.querySelector('meta[name="version"]');
+        if (versionMeta && versionMeta.content) {
+            sheet.appendChild(el("p", null, "Version " + versionMeta.content));
+        }
 
         sheet.appendChild(el("h2", null, "Fullscreen"));
         var full = el("div", "stand-row");

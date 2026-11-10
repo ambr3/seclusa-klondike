@@ -138,6 +138,20 @@
     font-family: var(--font-sans, system-ui, sans-serif);
 }
 
+@media (orientation: landscape) {
+    .game-foot {
+        align-items: center;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        /* Leave the score/time chips clear on the sides. */
+        padding-left: 9rem;
+        padding-right: 9rem;
+    }
+
+    .game-credits {
+        max-width: min(42rem, calc(100% - 22rem));
+    }
+}
+
 .game-credits a {
     color: var(--md-sys-color-primary, #c45c26);
     text-decoration: underline;

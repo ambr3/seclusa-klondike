@@ -514,7 +514,11 @@ describe('GameManager footer inset', () => {
         gm.safeArea = { top: 0, bottom: 40, left: 0, right: 0 };
         const boxes = gm.computeBoxes();
         const viewportH = Math.max(1, window.innerHeight - foot.offsetHeight);
-        if (boxes.isLandscape || !boxes.menuAtBottom) {
+        if (boxes.isLandscape) {
+            // Score/time sit in the footer strip with the credit line.
+            expect(boxes.chromeBar.top).toBe(viewportH);
+            expect(boxes.chromeBar.height).toBe(foot.offsetHeight);
+        } else if (!boxes.menuAtBottom) {
             expect(boxes.chromeBar.top).toBe(viewportH - 48);
         } else {
             expect(boxes.menuBar.top).toBe(viewportH - 16 - 72);
