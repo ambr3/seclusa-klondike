@@ -72,6 +72,7 @@ const SHELL = [
     "./cards/engine/util/prng.js",
     "./icon-192.png",
     "./icon-512.png",
+    "./icon-maskable-512.png",
     "./index.html",
     "./main.js",
     "./manifest.json",
